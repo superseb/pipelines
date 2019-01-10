@@ -1,29 +1,23 @@
 ---
-#apiVersion: v1
-#kind: Namespace
-#metadata:
-#  name: pipeline-${CICD_EXECUTION_SEQUENCE}
-#---
 apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
-  name: pipeline-${CICD_EXECUTION_SEQUENCE}
-#  namespace: pipeline-${CICD_EXECUTION_SEQUENCE}
+  name: pipeline-${CICD_GIT_COMMIT}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: pipeline-${CICD_EXECUTION_SEQUENCE}
+      app: pipeline-${CICD_GIT_COMMIT}
   template:
     metadata:
       labels:
-        app: pipeline-${CICD_EXECUTION_SEQUENCE}
-      name: pipeline-${CICD_EXECUTION_SEQUENCE}
+        app: pipeline-${CICD_GIT_COMMIT}
+      name: pipeline-${CICD_GIT_COMMIT}
     spec:
       imagePullSecrets:
       - name: pipeline-docker-registry
       containers:
-      - image: ${CICD_IMAGE}:${CICD_EXECUTION_SEQUENCE}
+      - image: ${CICD_IMAGE}:${CICD_GIT_COMMIT}
         name: pipeline
         imagePullPolicy: Always
         ports:
@@ -34,15 +28,14 @@ spec:
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: pipeline-${CICD_EXECUTION_SEQUENCE}
-#  namespace: pipeline-${CICD_EXECUTION_SEQUENCE}
+  name: pipeline-${CICD_GIT_COMMIT}
 spec:
   rules:
-  - host: pipelines-${CICD_EXECUTION_SEQUENCE}.demo.rnchr.nl
+  - host: pipelines-${CICD_GIT_COMMIT}.demo.rnchr.nl
     http:
       paths:
       - backend:
-          serviceName: pipeline-${CICD_EXECUTION_SEQUENCE}
+          serviceName: pipeline-${CICD_GIT_COMMIT}
           servicePort: 80
 ---
 apiVersion: v1
@@ -50,9 +43,8 @@ kind: Service
 metadata:
   labels:
       app: pipeline
-      version: "${CICD_EXECUTION_SEQUENCE}"
-  name: pipeline-${CICD_EXECUTION_SEQUENCE}
-#  namespace: pipelines-${CICD_EXECUTION_SEQUENCE}
+      version: "${CICD_GIT_COMMIT}"
+  name: pipeline-${CICD_GIT_COMMIT}
 spec:
   ports:
   - name: http
@@ -61,4 +53,4 @@ spec:
     targetPort: 80
   type: ClusterIP
   selector:
-    app: pipeline-${CICD_EXECUTION_SEQUENCE}
+    app: pipeline-${CICD_GIT_COMMIT}
